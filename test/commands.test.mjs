@@ -27,6 +27,12 @@ test("parseCommand: 切换工作区（名称/路径）", () => {
   assert.deepEqual(parseCommand("#工作区 /tmp/foo"), { kind: "switch-workspace", arg: "/tmp/foo" });
 });
 
+test("parseCommand: 切换工作区无参数也识别（由 runCommand 提示用法）", () => {
+  assert.deepEqual(parseCommand("切换工作区"), { kind: "switch-workspace", arg: "" });
+  assert.deepEqual(parseCommand("切换工作区 "), { kind: "switch-workspace", arg: "" });
+  assert.deepEqual(parseCommand("设置工作目录"), { kind: "switch-workspace", arg: "" });
+});
+
 test("parseCommand: 查看/设置当前目录", () => {
   assert.deepEqual(parseCommand("#cwd"), { kind: "show-cwd" });
   assert.deepEqual(parseCommand("查看目录"), { kind: "show-cwd" });
