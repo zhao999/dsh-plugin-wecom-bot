@@ -150,6 +150,7 @@ wecom-bot: connected
 | `cwd` | 进程 cwd | agent 的工作目录 |
 | `provider` / `model` | 默认模型选择 | 覆盖 agent 使用的模型（留空用 `agentDefaultModel`） |
 | `reasoningEffort` | 默认 | 推理档位（如 `high`/`medium`/`low`） |
+| `agentPreset` | 部署默认（`standard`） | agent 装配预设：决定工具/提示。留空用部署默认（web profile 为 `standard`，含 bash/fs 等完整工具）；可选 `code` / `minimal`。**缺失 preset 时 agent 无工具，任务会"假执行"（模型输出伪工具调用文本）** |
 | `ignoreOlderThanSec` | `300` | 忽略超过该秒数的历史消息（重连补发防抖） |
 | `maxReplyChars` | `6000` | 最终回复最大字符数，超出截断 |
 | `ackOnReceive` | `true` | 先推一条「已收到」中间态 |
