@@ -13,7 +13,7 @@ function makeFakeCtx() {
   const disposed = [];
   const agents = {
     create: async (opts) => {
-      created.push(String(opts.sessionId));
+      created.push({ sessionId: String(opts.sessionId), cwd: opts.meta?.cwd });
       const agent = {
         id: opts.sessionId,
         session: { id: opts.sessionId, seq: 0, events: [] },
@@ -44,8 +44,9 @@ test("UserSession: 首次 ensureAgent 创建随机 sessionId", async () => {
   const session = new UserSession(ctx, config, "single:user1");
   const agent = await session.ensureAgent();
   assert.equal(created.length, 1);
-  assert.match(created[0], /^wecom-[0-9a-f-]{36}$/);
-  assert.equal(agent.session.id, created[0]);
+  assert.match(created[0].sessionId, /^wecom-[0-9a-f-]{36}$/);
+  assert.equal(agent.session.id, created[0].sessionId);
+  assert.equal(created[0].cwd, "/base", "首次创建使用配置 cwd");
 });
 
 test("UserSession: 未切换时复用同一 agent，不重复创建", async () => {
@@ -60,16 +61,17 @@ test("UserSession: 切换 cwd 后重建使用全新 sessionId（不再冲突）"
   const { ctx, created, disposed } = makeFakeCtx();
   const session = new UserSession(ctx, config, "single:user1");
   await session.ensureAgent();
-  const firstId = created[0];
+  const first = created[0];
 
   await session.switchCwd("/new/dir");
   assert.equal(session.cwd, "/new/dir");
-  assert.deepEqual(disposed, [firstId], "旧 agent 应被 dispose");
+  assert.deepEqual(disposed, [first.sessionId], "旧 agent 应被 dispose");
 
   await session.ensureAgent();
   assert.equal(created.length, 2, "切换后应重建 agent");
-  assert.notEqual(created[1], firstId, "新 sessionId 必须与旧的不同");
-  assert.match(created[1], /^wecom-[0-9a-f-]{36}$/);
+  assert.notEqual(created[1].sessionId, first.sessionId, "新 sessionId 必须与旧的不同");
+  assert.match(created[1].sessionId, /^wecom-[0-9a-f-]{36}$/);
+  assert.equal(created[1].cwd, "/new/dir", "重建 agent 必须使用新目录");
 });
 
 test("UserSession: 新建会话（无旧 handle）切换只更新 cwd", async () => {
