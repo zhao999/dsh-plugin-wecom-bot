@@ -1,0 +1,19 @@
+# dsh-plugin-wecom-bot 的 bundle patch：把 wecom-bot 插件行插入到装配树。
+#
+# botId / botSecret 是敏感凭证，不写死在包里：默认从环境变量读取
+# （WECOM_BOT_ID / WECOM_BOT_SECRET）。也可以在 profile 的
+# cordis.patch.yml 里按 id 覆盖本行 config 写入真实值，例如：
+#
+#   - id: wecom-bot
+#     config:
+#       botId: wwxxxxxxxxxxxxxx
+#       botSecret: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+#
+# 注意：patch 覆盖的是整行 config，覆盖时要把需要保留的项一并写全。
+
+- insert:
+    - id: wecom-bot
+      name: dsh-plugin-wecom-bot
+      config:
+        botId: !!js process.env.WECOM_BOT_ID ?? ''
+        botSecret: !!js process.env.WECOM_BOT_SECRET ?? ''

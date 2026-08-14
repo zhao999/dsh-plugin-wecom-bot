@@ -1,0 +1,15 @@
+# 插件依赖（link: 安装方式要求插件自带 node_modules）
+node_modules/
+
+# 本地构建/工具产物（pnpm、缓存、store）
+.tools/
+.pnpm-store/
+.pnpm-cache/
+.npm-cache/
+
+# 日志与临时文件
+*.log
+.DS_Store
+
+# pnpm 本地安装自动生成的配置（发布时无意义）
+pnpm-workspace.yaml
