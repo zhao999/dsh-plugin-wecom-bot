@@ -33,6 +33,12 @@ test("parseCommand: 切换工作区无参数也识别（由 runCommand 提示用
   assert.deepEqual(parseCommand("设置工作目录"), { kind: "switch-workspace", arg: "" });
 });
 
+test("parseCommand: 切换工作区支持「到/为/至」无空格连接", () => {
+  assert.deepEqual(parseCommand("切换工作区到plug"), { kind: "switch-workspace", arg: "plug" });
+  assert.deepEqual(parseCommand("切换工作区为plug"), { kind: "switch-workspace", arg: "plug" });
+  assert.deepEqual(parseCommand("切换工作区至productv4-web"), { kind: "switch-workspace", arg: "productv4-web" });
+});
+
 test("parseCommand: 查看/设置当前目录", () => {
   assert.deepEqual(parseCommand("#cwd"), { kind: "show-cwd" });
   assert.deepEqual(parseCommand("查看目录"), { kind: "show-cwd" });
