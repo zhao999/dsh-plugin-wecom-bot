@@ -136,7 +136,29 @@ wecom-bot: connected
 - 需要 `sessionMode: per-user`（默认值）才支持切换；`per-message` 模式下
   每条消息都新建 agent，切换不持久。
 
-## 六、配置项
+## 六、权限审批（企业微信内完成）
+
+agent 执行需要**权限提升**的操作（如沙箱升级、写敏感区域）时，DSH 会发起
+审批。本插件把审批请求**转发到企业微信**，你在聊天里直接回复即可，无需
+打开网页：
+
+```
+🔐 需要审批 #1
+工具：execute_command
+原因：命令需要提升权限以完成操作
+
+回复「同意 #1」批准，或「拒绝 #1」拒绝
+（也可直接回复 同意 / 拒绝，匹配你最近一条审批）
+```
+
+- 审批推送对象：**发起任务的成员**（私聊直接回，群聊里只有发起者回复才有效）。
+- 回复支持：`同意 / 批准 / 允许 / 是 / ok / y`（批准），
+  `拒绝 / 不同意 / 否 / no / n`（拒绝）；可带编号 `#1` 精确定位多条审批。
+- 不回复时 agent 任务会**保持挂起**等待；可用 `approvalTimeoutMs` 配置超时
+  （超时按拒绝处理）。
+- 非 bot 创建的 agent（如 Web GUI 会话）的审批仍走网页审批，互不影响。
+
+## 七、配置项
 
 | 配置键 | 默认值 | 说明 |
 |---|---|---|
@@ -155,8 +177,9 @@ wecom-bot: connected
 | `maxReplyChars` | `6000` | 最终回复最大字符数，超出截断 |
 | `ackOnReceive` | `true` | 先推一条「已收到」中间态 |
 | `stripGroupMentions` | `true` | 群聊消息去掉 `@机器人` 提及前缀 |
+| `approvalTimeoutMs` | `0` | 审批超时（毫秒），0=不超时（agent 保持挂起等回复）；超时按拒绝处理 |
 
-## 七、开发与测试
+## 八、开发与测试
 
 ```sh
 npm test        # node --test，跑协议/客户端/命令层单测
@@ -172,7 +195,7 @@ lib/index.js     # Cordis 插件：配置 schema、agent 任务调度、消息�
 test/            # node:test 单测（FakeSocket 回放协议帧 + 命令解析用例）
 ```
 
-## 八、已知限制
+## 九、已知限制
 
 - **必须带 ALPN 握手（已处理）**：企业微信长连接网关要求 TLS ClientHello
   携带 ALPN `http/1.1`，Node 内置 WebSocket（undici）与 `http.request` 默认

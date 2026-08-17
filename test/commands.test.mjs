@@ -7,7 +7,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, realpathSync, statSync } from "n
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { formatWorkspaceList, parseCommand, resolveTargetDir } from "../lib/commands.js";
+import { formatWorkspaceList, parseApprovalReply, parseCommand, resolveTargetDir } from "../lib/commands.js";
 
 // ── parseCommand ──────────────────────────────────────────────────────────
 
@@ -163,4 +163,27 @@ test("formatWorkspaceList: 空列表", () => {
   const text = formatWorkspaceList([], "/");
   assert.match(text, /已注册工作区（0 个）/);
   assert.match(text, /暂无/);
+});
+
+// ── parseApprovalReply ────────────────────────────────────────────────────
+
+test("parseApprovalReply: 同意/拒绝的多种写法", () => {
+  for (const text of ["同意", "批准", "允许", "是", "ok", "OK", "y", "Y", "yes"]) {
+    assert.deepEqual(parseApprovalReply(text), { allow: true, seq: undefined }, `input: ${text}`);
+  }
+  for (const text of ["拒绝", "不同意", "否", "no", "n"]) {
+    assert.deepEqual(parseApprovalReply(text), { allow: false, seq: undefined }, `input: ${text}`);
+  }
+});
+
+test("parseApprovalReply: 带审批编号", () => {
+  assert.deepEqual(parseApprovalReply("同意 #3"), { allow: true, seq: 3 });
+  assert.deepEqual(parseApprovalReply("拒绝3"), { allow: false, seq: 3 });
+  assert.deepEqual(parseApprovalReply("批准 12"), { allow: true, seq: 12 });
+});
+
+test("parseApprovalReply: 非审批消息返回 null", () => {
+  for (const text of ["同意这个方案", "好的", "收到", "帮我看看", "okay好的", "拒绝不了", "#ws"]) {
+    assert.equal(parseApprovalReply(text), null, `input: ${text}`);
+  }
 });
